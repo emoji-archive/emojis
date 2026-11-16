@@ -1,0 +1,1096 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emote Archive</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+
+<style>
+/* Layout: full-height app, titlebar + tabs + grid + statusbar */
+:root {
+  --bg: #1C1C1C;
+  --bg-deep: #121212;
+  --bg-panel: #161616;
+  --bg-hover: #252525;
+  --accent: #01F7E8;
+  --accent-dim: #0a5f5a;
+  --accent-glow: rgba(1,247,232,0.18);
+  --text: #c8f5f2;
+  --text-dim: #3a4a49;
+  --text-mid: #6a9a97;
+  --border: #1e3230;
+  --titlebar-gradient: linear-gradient(0deg,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,1) 42%,
+    rgba(20,20,20,1) 42%,
+    rgba(184,178,178,1) 100%
+  );
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Courier New", Courier, monospace;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--accent-dim);
+  padding-left: max(0px, env(safe-area-inset-left, 0px));
+  padding-right: max(0px, env(safe-area-inset-right, 0px));
+}
+
+/* TITLEBAR */
+#titlebar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--titlebar-gradient);
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--accent);
+  text-shadow: 0 0 4px rgba(1,247,232,0.5);
+}
+
+#titlebar-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#titlebar-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 4px var(--accent);
+  flex-shrink: 0;
+}
+
+#size-switch { display: flex; gap: 2px; }
+
+.size-btn {
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: var(--bg);
+  color: var(--text-dim);
+  border: 1px solid var(--accent-dim);
+  border-radius: 2px;
+  padding: 2px 6px;
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+}
+.size-btn:hover { color: var(--text); border-color: var(--accent); }
+.size-btn.active { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+
+/* TABS */
+#tabbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  height: 28px;
+  background: var(--bg-deep);
+  border-bottom: 1px solid var(--border);
+  padding: 0 6px;
+  gap: 2px;
+}
+
+.tab-btn {
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: none;
+  color: var(--text-mid);
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.1s, border-color 0.1s;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  text-shadow: 0 0 6px rgba(1,247,232,0.4);
+}
+.tab-btn.fav-tab { color: #FFB300; }
+.tab-btn.fav-tab.active {
+  color: #FFB300;
+  border-bottom-color: #FFB300;
+  text-shadow: 0 0 6px rgba(255,179,0,0.4);
+}
+
+/* COMBO BAR */
+#combobar {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 4px 6px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+}
+#combo-input {
+  flex: 1;
+  min-width: 120px;
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  background: var(--bg-deep);
+  color: var(--text);
+  border: 1px solid var(--accent-dim);
+  border-radius: 2px;
+  padding: 2px 6px;
+  height: 20px;
+  outline: none;
+  cursor: text;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#combo-input:focus { border-color: var(--accent); }
+#combo-input::placeholder { color: var(--text-dim); }
+@media (max-width: 500px) {
+  #combo-input {
+    order: 10;
+    flex: 1 0 100%;
+    min-width: 0;
+  }
+  #btn-combo-clear {
+    margin-left: auto;
+  }
+}
+#btn-combo-copy {
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: none;
+  color: var(--text-dim);
+  border: 1px solid var(--accent-dim);
+  border-radius: 2px;
+  padding: 2px 7px;
+  height: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.1s, border-color 0.1s, background 0.1s;
+}
+#btn-combo-copy:hover { color: var(--text); border-color: var(--accent); }
+#btn-combo-copy.copied { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+#btn-combo-clear {
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1;
+  background: none;
+  color: var(--text-dim);
+  border: 1px solid var(--accent-dim);
+  border-radius: 2px;
+  padding: 1px 6px;
+  height: 20px;
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+}
+#btn-combo-fav {
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: none;
+  color: var(--text-dim);
+  border: 1px solid var(--accent-dim);
+  border-radius: 2px;
+  padding: 2px 7px;
+  height: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.1s, border-color 0.1s, background 0.1s;
+}
+#btn-combo-fav:hover { color: #FFB300; border-color: #FFB300; }
+#btn-combo-fav.added { color: var(--bg); background: #FFB300; border-color: #FFB300; }
+
+#btn-combo-clear:hover { color: #ff5555; border-color: #ff5555; }
+
+/* GRID */
+#grid-wrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg);
+}
+#grid-wrap::-webkit-scrollbar { width: 6px; }
+#grid-wrap::-webkit-scrollbar-track { background: var(--bg-deep); }
+#grid-wrap::-webkit-scrollbar-thumb { background: var(--accent-dim); border-radius: 3px; }
+
+#grid {
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+}
+
+.emote-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  cursor: pointer;
+  aspect-ratio: 1/1;
+  transition: border-color 0.1s, box-shadow 0.1s;
+}
+.emote-cell:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+.emote-cell img {
+  max-width: calc(100% - 6px);
+  max-height: calc(100% - 6px);
+  image-rendering: pixelated;
+  display: block;
+}
+
+/* FAV TAB */
+#fav-wrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg);
+  display: none;
+  padding: 6px;
+}
+#fav-wrap.active { display: block; }
+#fav-wrap::-webkit-scrollbar { width: 6px; }
+#fav-wrap::-webkit-scrollbar-track { background: var(--bg-deep); }
+#fav-wrap::-webkit-scrollbar-thumb { background: var(--accent-dim); border-radius: 3px; }
+
+.fav-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.fav-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  border: 1px solid var(--accent-dim);
+  border-radius: 3px;
+  padding: 2px 3px;
+  background: var(--bg-panel);
+  cursor: pointer;
+
+  transition: border-color 0.1s, box-shadow 0.1s;
+  position: relative;
+  margin-top: 7px;
+  margin-right: 7px;
+}
+.fav-box:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 5px var(--accent-glow);
+}
+.fav-box--link {
+  border-color: #FFB300;
+  gap: 5px;
+  padding: 3px 6px;
+}
+.fav-box--link:hover {
+  border-color: #ffd04d;
+  box-shadow: 0 0 6px rgba(255,179,0,0.5);
+}
+.fav-link-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fav-box img {
+  image-rendering: pixelated;
+  display: block;
+  flex-shrink: 0;
+  max-height: var(--fav-h, 28px);
+  width: auto;
+}
+.fav-box .fav-emoji {
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.fav-box .fav-del {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 13px;
+  height: 13px;
+  background: #e8735a;
+  border: 1px solid #ff9a82;
+  border-radius: 50%;
+  font-size: 8px;
+  line-height: 1;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  box-shadow: 0 0 5px rgba(232,115,90,0.7);
+}
+.fav-del:hover {
+  background: #ff5a3a;
+  border-color: #ffaa90;
+  box-shadow: 0 0 8px rgba(255,90,58,0.9);
+}
+
+.copy-flash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(1,247,232,0.15);
+  border-radius: 2px;
+  font-size: 7px;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+@keyframes flash {
+  0%  { opacity: 1; }
+  60% { opacity: 1; }
+  100%{ opacity: 0; }
+}
+.copy-flash.show { animation: flash 0.6s ease-out forwards; }
+
+/* TOOLTIP */
+#tooltip {
+  position: fixed;
+  background: var(--bg-deep);
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 3px 7px;
+  border-radius: 2px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.8s;
+}
+#tooltip.visible { opacity: 1; transition: opacity 0.1s; }
+
+/* UTF TAB */
+#utf-wrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg);
+  display: none;
+}
+#utf-wrap.active { display: block; }
+#utf-wrap::-webkit-scrollbar { width: 6px; }
+#utf-wrap::-webkit-scrollbar-track { background: var(--bg-deep); }
+#utf-wrap::-webkit-scrollbar-thumb { background: var(--accent-dim); border-radius: 3px; }
+
+.utf-category {
+  padding: 6px 8px 2px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+
+.utf-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  padding: 2px 4px 4px;
+}
+
+.utf-cell {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  cursor: pointer;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  transition: border-color 0.1s, box-shadow 0.1s;
+  position: relative;
+  user-select: none;
+}
+.utf-cell:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 5px var(--accent-glow);
+}
+.utf-cell.big {
+  width: 48px;
+  height: 48px;
+  font-size: 30px;
+}
+.utf-cell.huge {
+  width: 72px;
+  height: 72px;
+  font-size: 46px;
+}
+
+/* EMPTY STATE */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px;
+  color: var(--text-dim);
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+.empty-icon { font-size: 24px; opacity: 0.4; }
+
+/* STATUSBAR */
+#statusbar {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  background: var(--bg-deep);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+#statusbar-center {
+  text-align: center;
+}
+#fav-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+#status-count { flex: 1; }
+
+#fav-actions { display: flex; gap: 4px; }
+
+.bar-btn {
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: none;
+  color: var(--text-dim);
+  border: 1px solid var(--accent-dim);
+  border-radius: 2px;
+  padding: 2px 6px;
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+  display: inline-flex;
+  align-items: center;
+}
+.bar-btn:hover { color: var(--text); border-color: var(--accent); }
+</style>
+
+<div id="titlebar">
+  <div id="titlebar-left">
+    <span id="titlebar-dot"></span>
+    <span>EMOTE ARCHIVE</span>
+  </div>
+  <div id="size-switch">
+    <button class="size-btn" data-size="28">normal</button>
+    <button class="size-btn" data-size="42">big</button>
+    <button class="size-btn active" data-size="64">huge</button>
+  </div>
+</div>
+
+<div id="tabbar">
+  <button class="tab-btn active" data-tab="sadistic">sadistic</button>
+  <button class="tab-btn" data-tab="gadu-gadu">gadu</button>
+  <button class="tab-btn" data-tab="o2">forum.o2</button>
+  <button class="tab-btn" data-tab="utf">utf ☺</button>
+  <button class="tab-btn fav-tab" data-tab="favorites">&#9733; fav</button>
+</div>
+
+<div id="combobar">
+  <button id="btn-combo-copy">&#9112; copy combo</button>
+  <button id="btn-combo-fav">&#9733; add to fav</button>
+  <button id="btn-combo-clear" title="clear combo">clr</button>
+  <input id="combo-input" type="text" readonly placeholder="click emotes to build a combo...">
+</div>
+
+
+
+<div id="utf-wrap"></div>
+<div id="fav-wrap"></div>
+
+<div id="grid-wrap">
+  <div id="grid"></div>
+</div>
+
+<div id="statusbar">
+  <span id="status-count">0 emotes</span>
+  <span id="statusbar-center">gbx'26</span>
+  <div id="fav-actions">
+    <label class="bar-btn" for="import-input" title="import favorites from JSON file">&#8593; fav</label>
+    <input type="file" id="import-input" accept=".json" hidden>
+    <button class="bar-btn" id="btn-export" title="export favorites to JSON file">&#8595; fav</button>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+<img src="https://emotes.neocities.org/sadol_smiles/icon_mrgreen.gif">
+<script>
+const SITE_BASE = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
+const TABS = {
+  'sadistic': {
+    base: 'sadol_smiles/',
+    items: [{"file": "icon_mrgreen.gif", "label": ":mrgreen:"}, {"file": "icon_lol.gif", "label": ":lol:"}, {"file": "icon_eek.gif", "label": ":shock:"}, {"file": "icon_cry.gif", "label": ":cry:"}, {"file": "icon_redface.gif", "label": ":oops:"}, {"file": "icon_evil.gif", "label": ":evil:"}, {"file": "icon_rolleyes.gif", "label": ":roll:"}, {"file": "icon_exclaim.gif", "label": ":!:"}, {"file": "icon_question.gif", "label": ":?:"}, {"file": "icon_idea.gif", "label": ":idea:"}, {"file": "icon_arrow.gif", "label": ":arrow:"}, {"file": "hitler.gif", "label": ":hitler:"}, {"file": "lodowka.gif", "label": ":lodowka:"}, {"file": "idzpan8yozz1.gif", "label": ":idzwchuj:"}, {"file": "kupa.gif", "label": ":kupa:"}, {"file": "samoboj.gif", "label": ":samoboj:"}, {"file": "mood_emo.gif", "label": ":emo:"}, {"file": "00000981.gif", "label": ":lozko:"}, {"file": "111.gif", "label": ":mikolaj:"}, {"file": "banany.gif", "label": ":banany:"}, {"file": "oral.gif", "label": ":cumshot:"}, {"file": "pogrzeb.gif", "label": ":dead:"}, {"file": "023.gif", "label": ":ok:"}, {"file": "040.gif", "label": ":megalol:"}, {"file": "202.gif", "label": ":wytrysk:"}, {"file": "dac_noge.gif", "label": ":noga:"}, {"file": "gilotyna.gif", "label": ":gilotyna:"}, {"file": "patykiem.gif", "label": ":badyl:"}, {"file": "sex.gif", "label": ":doggy:"}, {"file": "hurrra.gif", "label": ":hurra:"}, {"file": "pdt_bud.gif", "label": ":jezdziec:"}, {"file": "pdt_kar.gif", "label": ":karate:"}, {"file": "pdt_vis.gif", "label": ":wisielec:"}, {"file": "kopniak.gif", "label": ":kop:"}, {"file": "krzyz.gif", "label": ":ukrzyzowany:"}, {"file": "konik.gif", "label": ":walikonia:"}, {"file": "polewaj.gif", "label": ":wodka:"}, {"file": "rotfl1.jpg", "label": ":rofl:"}, {"file": "sciana.gif", "label": ":glowawmur:"}, {"file": "sex_algida.gif", "label": ":blowjob:"}, {"file": "sex_konik.gif", "label": ":wali:"}, {"file": "zygi.gif", "label": ":rzyga:"}, {"file": "chomik.gif", "label": ":chomik:"}, {"file": "swinia.gif", "label": ":swinia:"}, {"file": "wytrysk.gif", "label": ":orgazm:"}, {"file": "7.gif", "label": ":szczerbaty:"}, {"file": "explozja.gif", "label": ":bomba:"}, {"file": "hopsa.gif", "label": ":beka:"}, {"file": "pdt_alc.gif", "label": ":pijaki:"}, {"file": "gay.gif", "label": ":szofer:"}, {"file": "jupi.gif", "label": ":zielonakula:"}, {"file": "liebe00.gif", "label": ":odtylca:"}, {"file": "snajper.gif", "label": ":snajper2:"}, {"file": "pdt_inv.gif", "label": ":kaleka:"}, {"file": "diab9.gif", "label": ":diabel:"}, {"file": "kill.gif", "label": ":psycho:"}, {"file": "eusa_eh.gif", "label": ":wtf:"}, {"file": "16advsx.gif", "label": ":hitlerzaba:"}, {"file": "kac.gif", "label": ":kac:"}, {"file": "eusa_whistle.gif", "label": ":fiufiu:"}, {"file": "f4my5w.gif", "label": ":smiechzula:"}, {"file": "pdt_bur2.gif", "label": ":gniew:"}, {"file": "brak_tematu.gif", "label": ":offtopic:"}, {"file": "loldev.gif", "label": ":loldev:"}, {"file": "color.gif", "label": ":tecza:"}, {"file": "thumbup.gif", "label": ":spoko:"}, {"file": "emotka_2029.gif", "label": ":metalhead:"}, {"file": "emotka_2392.gif", "label": ":nietoperz:"}, {"file": "glaszcze.gif", "label": ":glasku:"}, {"file": "blant.gif", "label": ":maryska:"}, {"file": "caa363a225d5.gif", "label": ":sloik:"}, {"file": "tub_429.gif", "label": ":sraka:"}, {"file": "41b7c964.png", "label": ":facepalm2:"}, {"file": "9b48c629.gif", "label": ":facepalm:"}, {"file": "boobs.gif", "label": ":cycki:"}, {"file": "coffee.gif", "label": ":kawa:"}, {"file": "daruns.gif", "label": ":sraczka:"}, {"file": "emotka_2414.gif", "label": ":dupsko:"}, {"file": "fukingay.gif", "label": ":gay:"}, {"file": "goatse.gif", "label": ":goatse:"}, {"file": "load.gif", "label": ":spermshot:"}, {"file": "shit.gif", "label": ":kloc:"}, {"file": "smi1.png", "label": ":amused:"}, {"file": "suicide.gif", "label": ":samobojstwo:"}, {"file": "whip.gif", "label": ":pejcz:"}, {"file": "fuckoff.gif", "label": ":fuck-off:"}, {"file": "06efed25b81d.gif", "label": ":seksik:"}, {"file": "7efee6e954c4.gif", "label": ":terror:"}, {"file": "7fa0af6055cd.png", "label": ":homer:"}, {"file": "8f7200431a54.gif", "label": ":kjujik:"}, {"file": "9e3aa330973f.gif", "label": ":sparta:"}, {"file": "b57c92f75f13.gif", "label": ":okurwa:"}, {"file": "ce7be533b714.gif", "label": ":plzdie:"}, {"file": "piwo.gif", "label": ":piwo:"}, {"file": "04c8d2a0e0c9.gif", "label": ":cycuszki:"}, {"file": "3bcf78b13646.gif", "label": ":rzygi2:"}, {"file": "8d2ad9671de3.jpg", "label": ":krejzi:"}, {"file": "8eb7c4b6bfcf.gif", "label": ":tasak:"}, {"file": "eusa_clap.gif", "label": ":brawo:"}, {"file": "rotfl2.gif", "label": ":ubawdolez:"}, {"file": "i_lol2_13c.gif", "label": ":szydera:"}, {"file": "i_niedobry.gif", "label": ":zul:"}, {"file": "ace03680f057.gif", "label": ":jumpingtits:"}, {"file": "7fa0457a3d03.gif", "label": ":karabin:"}, {"file": "eusa_dance.gif", "label": ":jejeje:"}, {"file": "rozpacz.gif", "label": ":szloch:"}, {"file": "angel.gif", "label": ":aniol:"}, {"file": "beatdeadhorse5.gif", "label": ":bije_konia:"}, {"file": "bliss.gif", "label": ":radocha:"}, {"file": "greenchainsaw.gif", "label": ":chainsaw:"}, {"file": "shrug.gif", "label": ":nie_znaju:"}, {"file": "facepalm.gif", "label": ":facepalm3:"}, {"file": "krawaciarz.gif", "label": ":krawaciarz:"}, {"file": "maja.gif", "label": ":maja:"}, {"file": "dd765b7a3289.gif", "label": ":catfacepalm:"}, {"file": "1be212bf58a3.gif", "label": ":nazimaja:"}, {"file": "8b13fc6922ed.png", "label": ":homer_uv:"}, {"file": "aa4687dc2f8d.png", "label": ":ks_homer:"}, {"file": "b9b7b056bdcb.gif", "label": ":trzesieee:"}, {"file": "bca275780c67.png", "label": ":trollencjusz:"}, {"file": "b334a5a3610e.jpg", "label": ":sispalm:"}, {"file": "932ec095ed09.gif", "label": ":kabelodprodiza:"}, {"file": "ba8ce256b25a.gif", "label": ":kkkpotrzask:"}, {"file": "ef88826ec620.png", "label": ":niggasmile:"}, {"file": "1a4f0db73327.gif", "label": ":anegdotka:"}, {"file": "128500618923s.jpg", "label": ":erniepalm:"}, {"file": "2055b77ef383.gif", "label": ":feler:"}, {"file": "b2f167ef1efe.gif", "label": ":wypierdalajzaba:"}, {"file": "cc2e3633c468.gif", "label": ":lubieplacki:"}, {"file": "4b831d07e268.gif", "label": ":thisissadistic:"}, {"file": "xalpalm.jpg", "label": ":xalpalm:"}, {"file": "b134e8b80adb.gif", "label": ":ciasteczkowy:"}, {"file": "6c4a8e5874d9.png", "label": ":mom_please:"}, {"file": "e2d40714ecd2.png", "label": ":wyjebane:"}, {"file": "c79f324d15e1.gif", "label": ":brawo2:"}, {"file": "1e6742faeb54.gif", "label": ":ja_pierdole:"}, {"file": "92cadaa27d9d.gif", "label": ":gmoch:"}, {"file": "10078026538d.gif", "label": ":ciasteczkowy2:"}, {"file": "glomp.gif", "label": ":glomp:"}, {"file": "0f0e167795a0.gif", "label": ":ruchapsa:"}, {"file": "6f29435ae35c.gif", "label": ":loskurwa:"}, {"file": "87cbaeea1558.gif", "label": ":bambo:"}, {"file": "3585289451eb.gif", "label": ":ruchaowce:"}, {"file": "61568f6914b9.gif", "label": ":shoty:"}, {"file": "61579420922d.gif", "label": ":ceglywysrane:"}, {"file": "b6c0900eda03.gif", "label": ":grob:"}, {"file": "f8dbafb5e818.gif", "label": ":rabin:"}, {"file": "58dcf8c2cb6d.gif", "label": ":101010:"}, {"file": "beatnik.gif", "label": ":ekspert:"}, {"file": "crowngrin.gif", "label": ":krol:"}, {"file": "driving.gif", "label": ":kierowca:"}, {"file": "c2f6c86b316c.gif", "label": ":swir:"}, {"file": "icon_smile.gif", "label": ":-)"}, {"file": "icon_wink.gif", "label": ";-)"}, {"file": "icon_smile2.gif", "label": ":->"}, {"file": "icon_biggrin.gif", "label": ":-D"}, {"file": "icon_razz.gif", "label": ":-P"}, {"file": "icon_surprised.gif", "label": ":-o"}, {"file": "icon_sad.gif", "label": ":-("}, {"file": "icon_neutral.gif", "label": ":-|"}, {"file": "icon_curve.gif", "label": ":-/"}, {"file": "icon_confused.gif", "label": ":-?"}, {"file": "icon_mad.gif", "label": ":-x"}, {"file": "icon_cool.gif", "label": "8-)"}]
+  },
+  'gadu-gadu': {
+    base: 'gadu-gadu/',
+    items: [{"file": "3m_sie.gif", "label": "3m sie"}, {"file": "8p.gif", "label": "8P"}, {"file": "aniolek.gif", "label": "aniolek"}, {"file": "beksa.gif", "label": "beksa"}, {"file": "bije.gif", "label": "bije"}, {"file": "boje_sie.gif", "label": "boje sie"}, {"file": "boks.gif", "label": "boks"}, {"file": "brawa.gif", "label": "brawa"}, {"file": "buja_w_oblokach.gif", "label": "buja w oblokach"}, {"file": "bukiet.gif", "label": "bukiet"}, {"file": "calus.gif", "label": "calus"}, {"file": "cfaniak.gif", "label": "cfaniak"}, {"file": "chatownik.gif", "label": "chatownik"}, {"file": "chytry.gif", "label": "chytry"}, {"file": "cisza.gif", "label": "cisza"}, {"file": "cmok.gif", "label": "cmok"}, {"file": "co.gif", "label": "co"}, {"file": "co_jest.gif", "label": "co jest"}, {"file": "czarodziej.gif", "label": "czarodziej"}, {"file": "czas.gif", "label": "czas"}, {"file": "czytaj.gif", "label": "czytaj"}, {"file": "diabelek.gif", "label": "diabelek"}, {"file": "dobani.gif", "label": "dobani"}, {"file": "dostal.gif", "label": "dostal"}, {"file": "dresiarz.gif", "label": "dresiarz"}, {"file": "drink.gif", "label": "drink"}, {"file": "dupa.gif", "label": "dupa"}, {"file": "faja.gif", "label": "faja"}, {"file": "fuck.gif", "label": "fuck"}, {"file": "gafa.gif", "label": "gafa"}, {"file": "ganja.gif", "label": "ganja"}, {"file": "gazeta.gif", "label": "gazeta"}, {"file": "glaszcze.gif", "label": "glaszcze"}, {"file": "glupek.gif", "label": "glupek"}, {"file": "glupek2.gif", "label": "glupek2"}, {"file": "gool.gif", "label": "gool"}, {"file": "gra.gif", "label": "gra"}, {"file": "hahaha.gif", "label": "hahaha"}, {"file": "heej.gif", "label": "heej"}, {"file": "hmmm.gif", "label": "hmmm"}, {"file": "jablko.gif", "label": "jablko"}, {"file": "je_pizze.gif", "label": "je pizze"}, {"file": "jem.gif", "label": "jem"}, {"file": "jezyk1.gif", "label": "jezyk1"}, {"file": "jezyk2.gif", "label": "jezyk2"}, {"file": "jupi.gif", "label": "jupi"}, {"file": "kawa.gif", "label": "kawa"}, {"file": "killer.gif", "label": "killer"}, {"file": "klotnia.gif", "label": "klotnia"}, {"file": "krecka_dostal.gif", "label": "krecka dostal"}, {"file": "krzywy.gif", "label": "krzywy"}, {"file": "kwasny.gif", "label": "kwasny"}, {"file": "kwiatek.gif", "label": "kwiatek"}, {"file": "list.gif", "label": "list"}, {"file": "lol.gif", "label": "lol"}, {"file": "menu.gif", "label": "menu"}, {"file": "milosc.gif", "label": "milosc"}, {"file": "mruga.gif", "label": "mruga"}, {"file": "mutny.gif", "label": "mutny"}, {"file": "nauka.gif", "label": "nauka"}, {"file": "nie.gif", "label": "nie"}, {"file": "nie_powiem.gif", "label": "nie powiem"}, {"file": "niee.gif", "label": "niee"}, {"file": "nonono.gif", "label": "nonono"}, {"file": "obiad.gif", "label": "obiad"}, {"file": "oczko.gif", "label": "oczko"}, {"file": "oczko2.gif", "label": "oczko2"}, {"file": "oczy.gif", "label": "oczy"}, {"file": "ok.gif", "label": "ok"}, {"file": "ok2.gif", "label": "ok2"}, {"file": "okularnik.gif", "label": "okularnik"}, {"file": "olaboga.gif", "label": "olaboga"}, {"file": "onajego.gif", "label": "onajego"}, {"file": "pada.gif", "label": "pada"}, {"file": "paker.gif", "label": "paker"}, {"file": "palacz.gif", "label": "palacz"}, {"file": "papa.gif", "label": "papa"}, {"file": "peace.gif", "label": "peace"}, {"file": "pisze.gif", "label": "pisze"}, {"file": "piwko2.gif", "label": "piwko2"}, {"file": "piwo.gif", "label": "piwo"}, {"file": "placze.gif", "label": "placze"}, {"file": "pomocy.gif", "label": "pomocy"}, {"file": "prezent.gif", "label": "prezent"}, {"file": "prysznic.gif", "label": "prysznic"}, {"file": "przytul.gif", "label": "przytul"}, {"file": "puknijsie.gif", "label": "puknijsie"}, {"file": "pytajnik.gif", "label": "pytajnik"}, {"file": "rotfl.gif", "label": "rotfl"}, {"file": "roza.gif", "label": "roza"}, {"file": "sciana.gif", "label": "sciana"}, {"file": "serce.gif", "label": "serce"}, {"file": "serducho.gif", "label": "serducho"}, {"file": "serduszka.gif", "label": "serduszka"}, {"file": "serduszka2.gif", "label": "serduszka2"}, {"file": "sex.gif", "label": "sex"}, {"file": "slonko.gif", "label": "slonko"}, {"file": "smutny.gif", "label": "smutny"}, {"file": "snieg.gif", "label": "snieg"}, {"file": "soczek.gif", "label": "soczek"}, {"file": "spie.gif", "label": "spie"}, {"file": "spioch.gif", "label": "spioch"}, {"file": "spoko.gif", "label": "spoko"}, {"file": "stop.gif", "label": "stop"}, {"file": "szampan.gif", "label": "szampan"}, {"file": "tancze.gif", "label": "tancze"}, {"file": "telefon.gif", "label": "telefon"}, {"file": "tiaaa.gif", "label": "tiaaa"}, {"file": "tort.gif", "label": "tort"}, {"file": "tuptup.gif", "label": "tuptup"}, {"file": "uczen.gif", "label": "uczen"}, {"file": "uscisk.gif", "label": "uscisk"}, {"file": "usmiech.gif", "label": "usmiech"}, {"file": "usmiech2.gif", "label": "usmiech2"}, {"file": "usta.gif", "label": "usta"}, {"file": "wanna.gif", "label": "wanna"}, {"file": "wc.gif", "label": "wc"}, {"file": "wesoly.gif", "label": "wesoly"}, {"file": "winko.gif", "label": "winko"}, {"file": "wow.gif", "label": "wow"}, {"file": "wsciekly.gif", "label": "wsciekly"}, {"file": "wstydnis.gif", "label": "wstydnis"}, {"file": "wykrzyknik.gif", "label": "wykrzyknik"}, {"file": "ysz.gif", "label": "ysz"}, {"file": "z_jezorem.gif", "label": "z jezorem"}, {"file": "zab.gif", "label": "zab"}, {"file": "zakochany.gif", "label": "zakochany"}, {"file": "zawstydzony.gif", "label": "zawstydzony"}, {"file": "zdziwko.gif", "label": "zdziwko"}, {"file": "zeby.gif", "label": "zeby"}, {"file": "zegar.gif", "label": "zegar"}, {"file": "ziew.gif", "label": "ziew"}, {"file": "zly.gif", "label": "zly"}, {"file": "zniesmaczony.gif", "label": "zniesmaczony"}, {"file": "zygi.gif", "label": "zygi"}]
+  },
+  'o2': {
+    base: 'o2/',
+    items: [{"file": "usmiech.gif", "label": ":) / :-)"}, {"file": "smutas.gif", "label": ":( / :-("}, {"file": "oczko.gif", "label": ";) / ;-)"}, {"file": "smiech.gif", "label": ":D / :-D"}, {"file": "jezyk.gif", "label": ":P / :-P"}, {"file": "pechowiec.gif", "label": ":o / :-o"}, {"file": "beksa.gif", "label": "[beksa]"}, {"file": "cool.gif", "label": "[cool]"}, {"file": "kwiatek.gif", "label": "[kwiatek]"}, {"file": "lapka.gif", "label": "[cześć]"}, {"file": "serduszko.gif", "label": "[serce]"}, {"file": "spioch.gif", "label": "[śpioch]"}, {"file": "usta.gif", "label": "[usta]"}, {"file": "zly.gif", "label": "[zły]"}, {"file": "wsciekly.gif", "label": "[wściekły]"}, {"file": "ziewanie.gif", "label": "[ziewam]"}]
+  }
+};
+
+// ── UTF EMOJI DATA ──
+const UTF_CATS = [
+  { name: "Smileys & Emotion", emojis: "😀😃😄😁😆😅🤣😂🙂🙃🫠😉😊😇🥰😍🤩😘😗☺😚😙🥲😋😛😜🤪😝🤑🤗🤭🫢🫣🤫🤔🫡🤐🤨😐😑😶🫥😏😒🙄😬🤥🫨😌😔😪🤤😴😷🤒🤕🤢🤮🤧🥵🥶🥴😵🤯🤠🥳🥸😎🤓🧐😕🫤😟🙁☹😮😯😲😳🥺🥹😦😧😨😰😥😢😭😱😖😣😞😓😩😫🥱😤😡😠🤬😈👿💀☠💩🤡👹👺👻👽👾🤖😺😸😹😻😼😽🙀😿😾🙈🙉🙊💌💘💝💖💗💓💞💕💟❣💔❤🩷🧡💛💚💙🩵💜🤎🖤🩶🤍💋💯💢💥💫💦💨🕳💬🗨🗯💭💤" },
+  { name: "Gestures & Body", emojis: "👋🤚🖐✋🖖🫱🫲🫳🫴🫷🫸👌🤌🤏✌🤞🫰🤟🤘🤙👈👉👆🖕👇☝🫵👍👎✊👊🤛🤜👏🙌🫶👐🤲🤝🙏✍💅🤳💪🦾🦿🦵🦶👂🦻👃🫦👁👀🫀🫁🧠🦷🦴👅" },
+  { name: "People & Identity", emojis: "👶🧒👦👧🧑👱👨🧔👩🧓👴👵🙍🙎🙅🙆💁🙋🧏🙇🤦🤷👮🕵💂🥷👷🫅🤴👸👼🤶🫄🧙🧝🧛🧟🧞🧜🧚👩‍❤️‍👨👨‍👩‍👦👨‍👩‍👧👪" },
+  { name: "Animals & Nature", emojis: "🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐸🐵🙈🙉🙊🐔🐧🐦🐤🦆🦅🦉🦇🐺🐗🐴🦄🐝🪱🐛🦋🐌🐞🐜🪲🦟🦗🕷🦂🐢🐍🦎🦖🦕🐙🦑🦐🦞🦀🐡🐟🐠🐬🐳🐋🦈🦭🐊🐅🐆🦓🦍🐘🦛🦏🐪🐫🦒🦘🦬🐃🐂🐄🐎🐖🐏🐑🦙🐐🦌🐕🐩🦮🐈🐓🦃🦤🦚🦜🦢🦩🕊🐇🦝🦨🦡🦫🦦🦥🐁🐀🐿🦔🌵🎄🌲🌳🌴🌱🌿🍀☘🍃🪴🍂🍁🍄🌾💐🌷🌹🥀🌺🌸🌼🌻🌞🌝🌛🌜🌚🌕🌖🌗🌘🌑🌒🌓🌔🌙🌟💫⭐🌠🌌☀🌤⛅🌥☁🌦🌧⛈🌩🌨❄⛄🌬💨🌀🌈🌂☂☔⛱⚡🌊🌫🌊" },
+  { name: "Food & Drink", emojis: "🍏🍎🍐🍊🍋🍌🍉🍇🍓🫐🍈🍒🍑🥭🍍🥥🥝🍅🫒🥑🍆🥦🥬🥒🌶🫑🧄🧅🥔🍠🫚🥐🥯🍞🥖🥨🧀🥚🍳🧈🥞🧇🥓🥩🍗🍖🌭🍔🍟🍕🫓🥪🫔🌮🌯🫔🥗🥘🫕🥫🍝🍜🍲🍛🍣🍱🥟🦪🍤🍙🍚🍘🍥🥮🍢🧁🍰🎂🍮🍭🍬🍫🍿🍩🍪🌰🥜🍯🧃🥤🧋🍵☕🫖🍺🍻🥂🍷🥃🍸🍹🧉🍾🧊🥄🍴🍽🥢🧂" },
+  { name: "Travel & Places", emojis: "🌍🌎🌏🌐🗺🧭🏔⛰🌋🗻🏕🏖🏜🏝🏞🏟🏛🏗🏘🏚🏠🏡🏢🏣🏤🏥🏦🏨🏩🏪🏫🏬🏭🏯🏰💒🗼🗽⛪🕌🛕🕍⛩🕋⛲⛺🌁🌃🏙🌄🌅🌆🌇🌉🌌🌃🎠🎡🎢💈🎪🛣🛤🚂🚃🚄🚅🚆🚇🚈🚉🚊🚝🚞🚋🚌🚍🚎🚐🚑🚒🚓🚔🚕🚖🚗🚘🚙🛻🚚🚛🚜🏎🏍🛵🛺🚲🛴🛹🛼🚏🛣🛤⛽🚨🚥🚦🛑🚧⚓🛟🪝⛵🛶🚤🛳⛴🛥🚢✈🛩🛫🛬🛰🚀🛸🚁🛸💺🚁⛽🧳🌂☂🌂" },
+  { name: "Activities & Sports", emojis: "⚽🏀🏈⚾🥎🎾🏐🏉🥏🎱🪀🏓🏸🏒🥍🏑🥅⛳🪃🎣🤿🥊🥋🎽🛹🛼🛷⛸🥌🎿⛷🏂🪂🏋🤼🤸🤺⛹🤾🏌🧘🧗🏇🏊🏄🚵🚴🏆🥇🥈🥉🏅🎖🏵🎗🎫🎟🎪🤹🎭🩰🎨🎬🎤🎧🎼🎵🎶🥁🪘🎷🎺🎸🪕🎻🩭🎹🪗🎲♟🎯🎳🎮🕹🧩🪄🪅🧸🪆" },
+  { name: "Objects", emojis: "📱📲💻⌨🖥🖨🖱🖲💽💾💿📀🧮📷📸📹🎥📽🎞📞☎📟📠📺📻🧭⏱⏲⏰🕰⌛⏳📡🔋🪫🔌💡🔦🕯🪔🗑🛢💰💴💵💶💷💸💳🪙💹📈📉📊📋📌📍📎🖇📏📐✂🗃🗄🗑🔒🔓🔏🔐🔑🗝🔨🪓⛏⚒🛠🗡⚔🛡🪚🔧🪛🔩⚙🗜⚖🦯🔗⛓🪝🧲🪜🧰🩺🩻💊💉🩸🩹🩼🩺🧬🔭🔬🕳🛁🛀🪠🪤🛋🪑🚽🪆🚿🛁🪞🪟🛏🛋🧹🪣🧺🧻🪤🧷🧴🧸🧼🫧🧽🧯🛒🚪🪞🏮🪔📔📒📕📗📘📙📚📓📃📄📑🗒🗓📅📆🗑📇📂🗂🗳🗄📧📨📩📤📥📦📫📪📬📭📮🗳✏✒🖊🖋📝📮✂🗂💼👜👛👓🕶🥽🌂☂🧵🪡🧶🪢👒🎩🧢⛑📿💄💍💎🔮🪬" },
+  { name: "Symbols", emojis: "🔴🟠🟡🟢🔵🟣🟤⚫⚪🔶🔷🔸🔹🔺🔻💠🔘🔲🔳▪▫◾◽◼◻⬛⬜🟥🟧🟨🟩🟦🟪🟫❤🧡💛💚💙💜🖤🤍🤎💔❣💕💞💓💗💖💘💝🔁🔂▶⏩⏭⏯◀⏪⏮🔀🔃🎵🎶➕➖✖➗🟰♾️💲💱🔣🔤🔡🔠🆎🆑🆒🆓🆔🆕🆖🆗🆘🆙🆚🈶🈚🈷️🈶🈯🉐🈹🈚🈲🅰🅱🆎🆑🅾🆘❌⭕🛑⛔📛🚫🚳🚭🚯🚱🚷📵🔞🔕🔇🔕🔔🔈🔉🔊📢📣🔋🔌💡🔦🕯✅☑✔❎🔀🔁🔂▶⏩⏭⏯⏹⏺⏏🎦🔅🔆📶📳📴📵📡🔍🔎🔒🔓🔏🔐🔑🗝🔨⛏⚒🛠🗡⚔🛡🪚🔧🪛🔩⚙🗜⚖🦯🔗⛓🪝🧲🪜♈♉♊♋♌♍♎♏♐♑♒♓⛎🔯✡☸☯✝☦🛐⚛🕉☮🕎🔱⚜♻🔰♾🔱⚜🔰⚜💮🈴🈵🈹🈲🅰🅱🆎🅾🏧♿🚾🛗🅿🈳🈹🚺🚹🚼🚻🚮🎦🈵🈴🈵🉑㊙㊗🈶🈚🈷🈸🈺🈷🉐🈹🈲🈳🈚" },
+  { name: "Flags", emojis: "🏁🚩🎌🏴🏳🏳️‍🌈🏳️‍⚧️🏴‍☠️🇦🇨🇦🇩🇦🇪🇦🇫🇦🇬🇦🇮🇦🇱🇦🇲🇦🇴🇦🇶🇦🇷🇦🇸🇦🇹🇦🇺🇦🇼🇦🇽🇦🇿🇧🇦🇧🇧🇧🇩🇧🇪🇧🇫🇧🇬🇧🇭🇧🇮🇧🇯🇧🇱🇧🇲🇧🇳🇧🇴🇧🇶🇧🇷🇧🇸🇧🇹🇧🇻🇧🇼🇧🇾🇧🇿🇨🇦🇨🇨🇨🇩🇨🇫🇨🇬🇨🇭🇨🇮🇨🇰🇨🇱🇨🇲🇨🇳🇨🇴🇨🇵🇨🇷🇨🇺🇨🇻🇨🇼🇨🇽🇨🇾🇨🇿🇩🇪🇩🇬🇩🇯🇩🇰🇩🇲🇩🇴🇩🇿🇪🇦🇪🇨🇪🇪🇪🇬🇪🇭🇪🇷🇪🇸🇪🇹🇪🇺🇫🇮🇫🇯🇫🇰🇫🇲🇫🇴🇫🇷🇬🇦🇬🇧🇬🇩🇬🇪🇬🇫🇬🇬🇬🇭🇬🇮🇬🇱🇬🇲🇬🇳🇬🇵🇬🇶🇬🇷🇬🇸🇬🇹🇬🇺🇬🇼🇬🇾🇭🇰🇭🇲🇭🇳🇭🇷🇭🇹🇭🇺🇮🇨🇮🇩🇮🇪🇮🇱🇮🇲🇮🇳🇮🇴🇮🇶🇮🇷🇮🇸🇮🇹🇯🇪🇯🇲🇯🇴🇯🇵🇰🇪🇰🇬🇰🇭🇰🇮🇰🇲🇰🇳🇰🇵🇰🇷🇰🇼🇰🇾🇰🇿🇱🇦🇱🇧🇱🇨🇱🇮🇱🇰🇱🇷🇱🇸🇱🇹🇱🇺🇱🇻🇱🇾🇲🇦🇲🇨🇲🇩🇲🇪🇲🇫🇲🇬🇲🇭🇲🇰🇲🇱🇲🇲🇲🇳🇲🇴🇲🇵🇲🇶🇲🇷🇲🇸🇲🇹🇲🇺🇲🇻🇲🇼🇲🇽🇲🇾🇲🇿🇳🇦🇳🇨🇳🇪🇳🇫🇳🇬🇳🇮🇳🇱🇳🇴🇳🇵🇳🇷🇳🇺🇳🇿🇴🇲🇵🇦🇵🇪🇵🇫🇵🇬🇵🇭🇵🇰🇵🇱🇵🇲🇵🇳🇵🇷🇵🇸🇵🇹🇵🇼🇵🇾🇶🇦🇷🇪🇷🇴🇷🇸🇷🇺🇷🇼🇸🇦🇸🇧🇸🇨🇸🇩🇸🇪🇸🇬🇸🇭🇸🇮🇸🇯🇸🇰🇸🇱🇸🇲🇸🇳🇸🇴🇸🇷🇸🇸🇸🇹🇸🇻🇸🇽🇸🇾🇸🇿🇹🇦🇹🇨🇹🇩🇹🇫🇹🇬🇹🇭🇹🇯🇹🇰🇹🇱🇹🇲🇹🇳🇹🇴🇹🇷🇹🇹🇹🇻🇹🇼🇹🇿🇺🇦🇺🇬🇺🇲🇺🇳🇺🇸🇺🇾🇺🇿🇻🇦🇻🇨🇻🇪🇻🇬🇻🇮🇻🇳🇻🇺🇼🇫🇼🇸🇽🇰🇾🇪🇾🇹🇿🇦🇿🇲🇿🇼" }
+];
+
+let currentTab = 'sadistic';
+let currentSize = 64;
+let favorites = []; // tablica combo: [[url, url, ...], ...]
+
+const DEFAULT_FAVS = [
+  ['https://media.tenor.com/e2wqdcdVkOwAAAAM/hello-there-hi.gif'],
+  ['https://media.tenor.com/5SCGcTAf7z8AAAAM/cat-tired.gif'],
+  ['https://i.pinimg.com/originals/cf/eb/ee/cfebee8ad262ac6f09d92dcb71e45318.gif'],
+  ['https://i.pinimg.com/originals/9c/e0/4c/9ce04c7ddeef0b9abae7f085255cdef1.gif'],
+];
+
+const grid = document.getElementById('grid');
+const gridWrap = document.getElementById('grid-wrap');
+const favWrap = document.getElementById('fav-wrap');
+const statusCount = document.getElementById('status-count');
+const tooltip = document.getElementById('tooltip');
+let tooltipTimer = null;
+let copyBtnTimer = null;
+
+// ── INIT ──
+function init() {
+  loadState();
+  renderTab(currentTab);
+  bindEvents();
+}
+
+// ── RENDER ──
+const utfWrap = document.getElementById('utf-wrap');
+
+function renderTab(tabId) {
+  currentTab = tabId;
+  comboInput.setAttribute('readonly', '');
+  comboInput.placeholder = 'click emotes to build a combo...';
+
+  // ustaw aktywny przycisk zakładki
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === tabId)
+  );
+
+  // przełącz widoki
+  gridWrap.style.display = 'none';
+  utfWrap.classList.remove('active');
+  favWrap.classList.remove('active');
+
+  if (tabId === 'utf') {
+    utfWrap.classList.add('active');
+    renderUtf();
+    const total = UTF_CATS.reduce((s, c) => s + [...c.emojis].length, 0);
+    statusCount.textContent = total + ' emoji';
+    return;
+  }
+
+  if (tabId === 'favorites') {
+    favWrap.classList.add('active');
+    renderFav();
+    statusCount.textContent = favorites.length + ' combos';
+    if (combo.length) {
+      comboInput.setAttribute('readonly', '');
+      comboInput.placeholder = 'click emotes to build a combo...';
+    } else {
+      comboInput.removeAttribute('readonly');
+      comboInput.placeholder = 'paste image URL to add to fav...';
+      comboInput.value = '';
+    }
+    return;
+  }
+
+  gridWrap.style.display = '';
+  grid.innerHTML = '';
+
+  grid.style.gridTemplateColumns = 'repeat(auto-fill, ' + currentSize + 'px)';
+
+  const tab = TABS[tabId];
+  if (!tab) return;
+  const items = tab.items.map(item => ({ ...item, base: tab.base, tabId: tabId }));
+
+  const frag = document.createDocumentFragment();
+  for (const item of items) {
+    const cell = document.createElement('div');
+    cell.className = 'emote-cell';
+    cell.dataset.label = item.label;
+    cell.dataset.url = SITE_BASE + item.base + item.file;
+
+    const img = document.createElement('img');
+    img.src = item.base + item.file;
+    img.alt = item.label;
+    img.loading = 'lazy';
+
+    const flash = document.createElement('div');
+    flash.className = 'copy-flash';
+    flash.textContent = 'ok';
+
+    cell.appendChild(img);
+    cell.appendChild(flash);
+    frag.appendChild(cell);
+  }
+  grid.appendChild(frag);
+  statusCount.textContent = items.length + ' emotes';
+}
+function bindEvents() {
+  // taby
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTab(btn.dataset.tab);
+      saveState();
+    });
+  });
+
+  // rozmiar
+  document.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentSize = Number(btn.dataset.size);
+      document.querySelectorAll('.size-btn').forEach(b =>
+        b.classList.toggle('active', Number(b.dataset.size) === currentSize)
+      );
+      renderTab(currentTab);
+      applyUtfSize(currentSize);
+      saveState();
+    });
+  });
+
+  // klik na grid (delegacja)
+  grid.addEventListener('click', (e) => {
+    const cell = e.target.closest('.emote-cell');
+    if (!cell) return;
+    const url = cell.dataset.url;
+    navigator.clipboard.writeText(url).catch(() => {});
+    comboAdd(url);
+    clearTimeout(copyBtnTimer);
+    btnComboCopy.classList.add('copied');
+    btnComboCopy.innerHTML = '** copied **';
+    copyBtnTimer = setTimeout(() => {
+      btnComboCopy.classList.remove('copied');
+      btnComboCopy.innerHTML = '&#9112; copy combo';
+    }, 3000);
+    const flash = cell.querySelector('.copy-flash');
+    flash.classList.remove('show');
+    void flash.offsetWidth;
+    flash.classList.add('show');
+  });
+
+
+  // tooltip on tap (mobile)
+  let touchStartY = 0;
+  const hideTip = () => { clearTimeout(tooltipTimer); tooltip.classList.remove('visible'); };
+  grid.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  grid.addEventListener('touchend', (e) => {
+    const cell = e.target.closest('.emote-cell');
+    if (!cell) return;
+    if (Math.abs(e.changedTouches[0].clientY - touchStartY) > 8) return;
+    const t = e.changedTouches[0];
+    tooltip.textContent = cell.dataset.label;
+    tooltip.style.left = (t.clientX + 12) + 'px';
+    tooltip.style.top  = (t.clientY - 36) + 'px';
+    tooltip.classList.add('visible');
+    clearTimeout(tooltipTimer);
+    tooltipTimer = setTimeout(hideTip, 3000);
+  }, { passive: true });
+  gridWrap.addEventListener('scroll', hideTip, { passive: true });
+  // tooltip (desktop mouse only)
+  let hasTouch = false;
+  window.addEventListener('touchstart', () => { hasTouch = true; }, { once: true, passive: true });
+  grid.addEventListener('mouseover', (e) => {
+    if (hasTouch) return;
+    const cell = e.target.closest('.emote-cell');
+    if (!cell) return;
+    tooltip.textContent = cell.dataset.label;
+    tooltip.classList.add('visible');
+  });
+  grid.addEventListener('mousemove', (e) => {
+    if (hasTouch) return;
+    tooltip.style.left = (e.clientX + 12) + 'px';
+    tooltip.style.top  = (e.clientY - 24) + 'px';
+  });
+  grid.addEventListener('mouseout', (e) => {
+    if (hasTouch) return;
+    if (!e.target.closest('.emote-cell')) return;
+    tooltip.classList.remove('visible');
+  });
+
+  // export
+  document.getElementById('btn-export').addEventListener('click', () => {
+    const data = JSON.stringify(favorites, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'your-emote-favorites.json'; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // import
+  document.getElementById('import-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const arr = JSON.parse(ev.target.result);
+        if (Array.isArray(arr)) { favorites = arr; saveState(); renderTab(currentTab); }
+      } catch {}
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+}
+
+// ── UTF RENDER ──
+let utfRendered = false;
+
+function renderUtf() {
+  if (utfRendered) { applyUtfSize(currentSize); return; }
+  utfRendered = true;
+  const frag = document.createDocumentFragment();
+  for (const cat of UTF_CATS) {
+    const hdr = document.createElement('div');
+    hdr.className = 'utf-category';
+    hdr.textContent = cat.name;
+    frag.appendChild(hdr);
+
+    const row = document.createElement('div');
+    row.className = 'utf-row';
+
+    const seg = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+    const chars = [...seg.segment(cat.emojis)].map(s => s.segment);
+    for (const ch of chars) {
+      const cell = document.createElement('div');
+      cell.className = 'utf-cell';
+      cell.textContent = ch;
+      cell.dataset.emoji = ch;
+      row.appendChild(cell);
+    }
+    frag.appendChild(row);
+  }
+  utfWrap.appendChild(frag);
+  applyUtfSize(currentSize);
+
+  // event delegation na utfWrap
+  utfWrap.addEventListener('click', (e) => {
+    const cell = e.target.closest('.utf-cell');
+    if (!cell) return;
+    const ch = cell.dataset.emoji;
+    navigator.clipboard.writeText(ch).catch(() => {});
+    comboAdd(ch);
+    clearTimeout(copyBtnTimer);
+    btnComboCopy.classList.add('copied');
+    btnComboCopy.innerHTML = '** copied **';
+    copyBtnTimer = setTimeout(() => {
+      btnComboCopy.classList.remove('copied');
+      btnComboCopy.innerHTML = '&#9112; copy combo';
+    }, 3000);
+    // flash
+    cell.style.background = 'var(--accent-glow)';
+    setTimeout(() => cell.style.background = '', 400);
+  });
+
+  utfWrap.addEventListener('mouseover', (e) => {
+    const cell = e.target.closest('.utf-cell');
+    if (!cell) return;
+    const cp = [...cell.dataset.emoji].map(c => 'U+' + c.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')).join(' ');
+    tooltip.textContent = cp;
+    tooltip.classList.add('visible');
+  });
+  utfWrap.addEventListener('mousemove', (e) => {
+    tooltip.style.left = (e.clientX + 12) + 'px';
+    tooltip.style.top  = (e.clientY - 24) + 'px';
+  });
+  utfWrap.addEventListener('mouseout', (e) => {
+    if (!e.target.closest('.utf-cell')) return;
+    tooltip.classList.remove('visible');
+  });
+}
+
+// rozmiar dla utf-cell
+function applyUtfSize(size) {
+  document.querySelectorAll('.utf-cell').forEach(c => {
+    c.classList.toggle('big', size === 42);
+    c.classList.toggle('huge', size === 64);
+  });
+}
+
+// ── COMBO ──
+let combo = [];
+const comboInput = document.getElementById('combo-input');
+const btnComboCopy = document.getElementById('btn-combo-copy');
+const btnComboClear = document.getElementById('btn-combo-clear');
+
+function comboAdd(url) {
+  combo.push(url);
+  comboInput.value = combo.join(' ');
+  comboInput.scrollLeft = comboInput.scrollWidth;
+}
+
+function comboClear() {
+  combo = [];
+  comboInput.value = '';
+  if (currentTab === 'favorites') {
+    comboInput.removeAttribute('readonly');
+    comboInput.placeholder = 'paste image URL to add to fav...';
+  }
+}
+
+btnComboCopy.addEventListener('click', () => {
+  if (!combo.length) return;
+  navigator.clipboard.writeText(combo.join(' ')).catch(() => {});
+  btnComboCopy.classList.add('copied');
+  btnComboCopy.innerHTML = '** copied **';
+  setTimeout(() => {
+    btnComboCopy.classList.remove('copied');
+    btnComboCopy.innerHTML = '&#9112; copy combo';
+  }, 1200);
+});
+
+btnComboClear.addEventListener('click', comboClear);
+
+const btnComboFav = document.getElementById('btn-combo-fav');
+btnComboFav.addEventListener('click', () => {
+  // on favorites tab: add URL from input directly
+  if (currentTab === 'favorites' && !combo.length) {
+    const url = comboInput.value.trim();
+    if (!url) return;
+    favorites.push([url]);
+    saveState();
+    renderFav();
+    comboInput.value = '';
+    btnComboFav.classList.add('added');
+    btnComboFav.innerHTML = '&#10003; add to fav';
+    setTimeout(() => {
+      btnComboFav.classList.remove('added');
+      btnComboFav.innerHTML = '&#9733; add to fav';
+    }, 1200);
+    return;
+  }
+  if (!combo.length) return;
+  favorites.push([...combo]);
+  saveState();
+  if (currentTab === 'favorites') renderFav();
+  btnComboFav.classList.add('added');
+  btnComboFav.innerHTML = '&#10003; add to fav';
+  setTimeout(() => {
+    btnComboFav.classList.remove('added');
+    btnComboFav.innerHTML = '&#9733; add to fav';
+  }, 1200);
+});
+
+// ── FAV CLICK (raz na zawsze) ──
+favWrap.addEventListener('click', (e) => {
+  const del = e.target.closest('.fav-del');
+  if (del) {
+    e.stopPropagation();
+    const i = Number(del.dataset.idx);
+    favorites.splice(i, 1);
+    saveState();
+    renderFav();
+    statusCount.textContent = favorites.length + ' combos';
+    return;
+  }
+  const box = e.target.closest('.fav-box');
+  if (!box) return;
+  const i = Number(box.dataset.idx);
+  const urls = favorites[i];
+  for (const url of urls) comboAdd(url);
+  navigator.clipboard.writeText(urls.join(' ')).catch(() => {});
+  clearTimeout(copyBtnTimer);
+  btnComboCopy.classList.add('copied');
+  btnComboCopy.innerHTML = '** copied **';
+  copyBtnTimer = setTimeout(() => {
+    btnComboCopy.classList.remove('copied');
+    btnComboCopy.innerHTML = '&#9112; copy combo';
+  }, 3000);
+  box.style.boxShadow = '0 0 8px var(--accent)';
+  setTimeout(() => box.style.boxShadow = '', 500);
+});
+
+// ── FAV RENDER ──
+function renderFav() {
+  favWrap.style.setProperty('--fav-h', currentSize + 'px');
+  favWrap.innerHTML = '';
+  if (!favorites.length) {
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    empty.innerHTML = '<span class="empty-icon">\u2605</span><span>no favorites yet</span><span style="font-size:9px">use combo + add to fav</span>';
+    favWrap.appendChild(empty);
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  favorites.forEach((comboArr, idx) => {
+    const box = document.createElement('div');
+    box.className = 'fav-box';
+    box.dataset.idx = idx;
+    box.title = comboArr.join(' ');
+
+    // single external URL — image or generic link?
+    const isExternal = comboArr.length === 1 &&
+      /^https?:\/\//.test(comboArr[0]) &&
+      !comboArr[0].startsWith(SITE_BASE);
+    const isImageUrl = isExternal &&
+      /\.(gif|png|jpe?g|webp|svg|avif)(\?.*)?$/i.test(comboArr[0]);
+    if (isExternal && !isImageUrl) {
+      box.classList.add('fav-box--link');
+      const url = comboArr[0];
+      let domain;
+      try { domain = new URL(url).hostname; } catch(e) { domain = url; }
+      const fav = document.createElement('img');
+      fav.src = 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=32';
+      fav.width = 16; fav.height = 16;
+      fav.alt = '';
+      fav.style.imageRendering = 'pixelated';
+      const lbl = document.createElement('span');
+      lbl.className = 'fav-link-label';
+      lbl.textContent = domain;
+      box.appendChild(fav);
+      box.appendChild(lbl);
+    } else
+    for (const url of comboArr) {
+      if (url.includes('/')) {
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = url;
+        img.loading = 'lazy';
+        box.appendChild(img);
+      } else {
+        const sp = document.createElement('span');
+        sp.className = 'fav-emoji';
+        sp.textContent = url;
+        sp.style.width = currentSize + 'px';
+        sp.style.height = currentSize + 'px';
+        sp.style.fontSize = Math.round(currentSize * 0.72) + 'px';
+        box.appendChild(sp);
+      }
+    }
+
+    const del = document.createElement('button');
+    del.className = 'fav-del';
+    del.textContent = '\u00d7';
+    del.dataset.idx = idx;
+    box.appendChild(del);
+    frag.appendChild(box);
+  });
+
+  // row wrapper
+  const row = document.createElement('div');
+  row.className = 'fav-row';
+  row.appendChild(frag);
+  favWrap.appendChild(row);
+}
+
+// ── PERSISTENCE ──
+function saveState() {
+  try { localStorage.setItem('emote-favs', JSON.stringify(favorites)); } catch {}
+  try { localStorage.setItem('emote-size', currentSize); } catch {}
+  try { localStorage.setItem('emote-tab', currentTab); } catch {}
+}
+function loadState() {
+  try {
+    const f = localStorage.getItem('emote-favs');
+    if (f) {
+      const parsed = JSON.parse(f);
+      // obsługa starego formatu (Set/array stringów) i nowego (array of arrays)
+      if (Array.isArray(parsed) && parsed.length && Array.isArray(parsed[0])) {
+        favorites = parsed;
+      } else {
+        favorites = DEFAULT_FAVS.map(a => [...a]);
+      }
+    } else {
+      favorites = DEFAULT_FAVS.map(a => [...a]);
+    }
+  } catch {
+    favorites = DEFAULT_FAVS.map(a => [...a]);
+  }
+  try {
+    const s = Number(localStorage.getItem('emote-size'));
+    if (s === 28 || s === 42 || s === 64) {
+      currentSize = s;
+      document.querySelectorAll('.size-btn').forEach(btn =>
+        btn.classList.toggle('active', Number(btn.dataset.size) === currentSize)
+      );
+    }
+  } catch {}
+  try {
+    const t = localStorage.getItem('emote-tab');
+    if (t) {
+      // sprawdź czy taka zakładka istnieje
+      const validTabs = [...Object.keys(TABS), 'utf', 'favorites'];
+      if (validTabs.includes(t)) currentTab = t;
+    }
+  } catch {}
+}
+
+init();
+</script>
